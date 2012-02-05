@@ -1,2 +1,5 @@
 tags
 test
+*.o
+calc
+y.tab.h
