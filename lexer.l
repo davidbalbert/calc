@@ -6,16 +6,21 @@ void yyerror(char *);
 
 %%
 
-[0-9]+    {
-            yylval = atoi(yytext);
-            return INTEGER;
-          }
+[a-z]           {
+                  yylval = *yytext - 'a';
+                  return VARIABLE;
+                }
 
-[-+\n]    return *yytext;
+[0-9]+          {
+                  yylval = atoi(yytext);
+                  return INTEGER;
+                }
 
-[ \t]     ; // skip whitespace
+[-+()=/*\n]     { return *yytext; }
 
-.         yyerror("invalid character");
+[ \t]           ; // skip whitespace
+
+.               yyerror("invalid character");
 
 %%
 
