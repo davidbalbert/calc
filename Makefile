@@ -1,6 +1,6 @@
 YFLAGS = -d
 
-calc: calc.o lexer.o
+calc: calc.o lexer.o interpreter.o
 
 .PHONY: clean
 clean:
