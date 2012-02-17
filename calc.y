@@ -22,6 +22,7 @@
 
 %token INTEGER VARIABLE
 
+%right '='
 %left '+' '-'
 %left '*' '/'
 %right '^'
@@ -35,9 +36,7 @@ program:
         ;
 
 expr:
-        INTEGER
-        | VARIABLE                  { $$ = sym[$1]; }
-        | expr '+' expr             { $$ = $1 + $3; }
+        expr '+' expr             { $$ = $1 + $3; }
         | expr '-' expr             { $$ = $1 - $3; }
         | expr '*' expr             { $$ = $1 * $3; }
         | expr '/' expr             { $$ = $1 / $3; }
@@ -45,6 +44,8 @@ expr:
         | '-' expr %prec UMINUS     { $$ = -$2; }
         | VARIABLE '=' expr         { $$ = sym[$1] = $3; }
         | '(' expr ')'              { $$ = $2; }
+        | VARIABLE                  { $$ = sym[$1]; }
+        | INTEGER
         ;
 
 %%
