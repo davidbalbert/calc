@@ -1,41 +1,26 @@
 %{
-#include <stdlib.h>
-#include "calc.h"
-#include "y.tab.h"
-void yyerror(char *);
+  #include <stdlib.h>
+  extern void yyerror(char *);
+  #include "y.tab.h"
 %}
 
 %%
 
-[a-z]           {
-                  yylval.sIndex = *yytext - 'a';
-                  return VARIABLE;
-                }
+[a-zA-Z_][a-zA-Z_\d]*     {
+                            yylval.string = strdup(yytext);
+                            return VARIABLE;
+                          }
 
-0               {
-                  yylval.iValue = atoi(yytext);
-                  return INTEGER;
-                }
+[0-9]+                    {
+                            yylval.integer = atoi(yytext);
+                            return INTEGER;
+                          }
 
-[1-9][0-9]*     {
-                  yylval.iValue = atoi(yytext);
-                  return INTEGER;
-                }
+[-+()=/*\n^]              { return *yytext; }
 
-[-()<>=+*/;{}.] { return *yytext; }
+[ \t]                     ; // skip whitespace
 
-">="            { return GE; }
-"<="            { return LE; }
-"=="            { return EQ; }
-"!="            { return NE; }
-"while"         { return WHILE; }
-"if"            { return IF; }
-"else"          { return ELSE; }
-"print"         { return PRINT; }
-
-[ \t\n]+           ; // skip whitespace
-
-.               yyerror("unknown character");
+.                         yyerror("invalid character");
 
 %%
 
