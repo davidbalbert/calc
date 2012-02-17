@@ -13,13 +13,8 @@
 %%
 
 program:
-        program statement '\n'
+        program expr '\n'      { printf("%d\n", $2); }
         |
-        ;
-
-statement:
-        expr                 { printf("%d\n", $1); }
-        | VARIABLE '=' expr  { sym[$1] = $3; }
         ;
 
 expr:
@@ -30,6 +25,7 @@ expr:
         | expr '*' expr             { $$ = $1 * $3; }
         | expr '/' expr             { $$ = $1 / $3; }
         | '-' expr %prec UMINUS     { $$ = -$2; }
+        | VARIABLE '=' expr         { $$ = sym[$1] = $3; }
         | '(' expr ')'              { $$ = $2; }
         ;
 
