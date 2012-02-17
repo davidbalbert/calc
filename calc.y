@@ -4,6 +4,8 @@
   #include <math.h>
   #include <unistd.h>
 
+  #include "khash.h"
+
   #define TRUE 1
   #define FALSE 0
   #define BOOL int
@@ -14,13 +16,29 @@
   typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
   extern int yylex(void);
-  extern void yyerror(char *);
   extern YY_BUFFER_STATE yy_scan_string(const char *);
   extern void yy_delete_buffer(YY_BUFFER_STATE);
-  int sym[26];
+
+  void yyerror(char *);
+
+  extern char* yytext;
+
+  int get_var(char *);
+  int set_var(char *, int);
+
+  KHASH_MAP_INIT_STR(str, int);
+  khash_t(str) *variables;
 %}
 
-%token INTEGER VARIABLE
+%union {
+  int integer;
+  char *string;
+};
+
+%token <integer> INTEGER
+%token <string> VARIABLE
+
+%type <integer> expr
 
 %right '='
 %left '+' '-'
@@ -42,20 +60,40 @@ expr:
         | expr '/' expr             { $$ = $1 / $3; }
         | expr '^' expr             { $$ = pow($1, $3); }
         | '-' expr %prec UMINUS     { $$ = -$2; }
-        | VARIABLE '=' expr         { $$ = sym[$1] = $3; }
+        | VARIABLE '=' expr         { $$ = set_var($1, $3); }
         | '(' expr ')'              { $$ = $2; }
-        | VARIABLE                  { $$ = sym[$1]; }
+        | VARIABLE                  { $$ = get_var($1); }
         | INTEGER
         ;
 
 %%
+
+int get_var(char *name) {
+  khiter_t k;
+
+  k = kh_get(str, variables, name);
+
+  // no var set. maybe we should throw an error?
+  if (k == kh_end(variables)) return 0;
+
+  return kh_value(variables, k);
+}
+
+int set_var(char *name, int value) {
+  khiter_t k;
+  int ret;
+
+  k = kh_put(str, variables, name, &ret);
+  kh_value(variables, k) = value;
+
+  return value;
+}
 
 void yyerror(char *s) {
   fprintf(stderr, "%s\n", s);
 }
 
 int main(int argc, const char *argv[]) {
-
   BOOL from_stdin = FALSE;
 
   if (argc > 1) {
@@ -68,6 +106,8 @@ int main(int argc, const char *argv[]) {
   } else if (!isatty(fileno(stdin))) {
     from_stdin = TRUE;
   }
+
+  variables = kh_init(str);
 
   if (from_stdin) {
     yyparse();

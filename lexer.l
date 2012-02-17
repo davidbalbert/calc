@@ -6,21 +6,21 @@
 
 %%
 
-[a-z]           {
-                  yylval = *yytext - 'a';
-                  return VARIABLE;
-                }
+[a-zA-Z_][a-zA-Z_\d]*     {
+                            yylval.string = strdup(yytext);
+                            return VARIABLE;
+                          }
 
-[0-9]+          {
-                  yylval = atoi(yytext);
-                  return INTEGER;
-                }
+[0-9]+                    {
+                            yylval.integer = atoi(yytext);
+                            return INTEGER;
+                          }
 
-[-+()=/*\n^]     { return *yytext; }
+[-+()=/*\n^]              { return *yytext; }
 
-[ \t]           ; // skip whitespace
+[ \t]                     ; // skip whitespace
 
-.               yyerror("invalid character");
+.                         yyerror("invalid character");
 
 %%
 
