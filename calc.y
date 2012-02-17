@@ -1,13 +1,16 @@
 %{
   #include <stdio.h>
+  #include <math.h>
   int yylex(void);
   void yyerror(char *);
   int sym[26];
 %}
 
 %token INTEGER VARIABLE
+
 %left '+' '-'
 %left '*' '/'
+%right '^'
 %left UMINUS
 
 %%
@@ -24,6 +27,7 @@ expr:
         | expr '-' expr             { $$ = $1 - $3; }
         | expr '*' expr             { $$ = $1 * $3; }
         | expr '/' expr             { $$ = $1 / $3; }
+        | expr '^' expr             { $$ = pow($1, $3); }
         | '-' expr %prec UMINUS     { $$ = -$2; }
         | VARIABLE '=' expr         { $$ = sym[$1] = $3; }
         | '(' expr ')'              { $$ = $2; }
