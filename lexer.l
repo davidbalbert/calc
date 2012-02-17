@@ -1,7 +1,7 @@
 %{
-#include <stdlib.h>
-void yyerror(char *);
-#include "y.tab.h"
+  #include <stdlib.h>
+  extern void yyerror(char *);
+  #include "y.tab.h"
 %}
 
 %%
