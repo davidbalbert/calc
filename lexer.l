@@ -13,7 +13,7 @@
                             return VARIABLE;
                           }
 
-([1-9][0-9]+|[0-9])\.[0-9]+       {
+([1-9][0-9]+|[0-9])?\.[0-9]+       {
                                     yylval.num = NEW_RATIONAL(strtod(yytext, NULL));
                                     return RATIONAL;
                                   }
