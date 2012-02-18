@@ -1,6 +1,8 @@
 %{
   #include <stdlib.h>
   extern void yyerror(char *);
+
+  #include "calc.h"
   #include "y.tab.h"
 %}
 
@@ -11,8 +13,13 @@
                             return VARIABLE;
                           }
 
-[0-9]+                    {
-                            yylval.integer = atoi(yytext);
+([1-9][0-9]+|[0-9])\.[0-9]+       {
+                                    yylval.num = NEW_RATIONAL(strtod(yytext, NULL));
+                                    return RATIONAL;
+                                  }
+
+([1-9][0-9]+|[0-9])       {
+                            yylval.num = NEW_INTEGER(strtol(yytext, NULL, 10));;
                             return INTEGER;
                           }
 

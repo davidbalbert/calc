@@ -1,14 +1,10 @@
 %{
   #include <stdio.h>
   #include <string.h>
-  #include <math.h>
   #include <unistd.h>
 
   #include "khash.h"
-
-  #define TRUE 1
-  #define FALSE 0
-  #define BOOL int
+  #include "calc.h"
 
   #define BUFFER_SIZE 1024
 
@@ -23,22 +19,20 @@
 
   extern char* yytext;
 
-  int get_var(char *);
-  int set_var(char *, int);
-
-  KHASH_MAP_INIT_STR(str, int);
+  KHASH_MAP_INIT_STR(str, NUMBER);
   khash_t(str) *variables;
 %}
 
 %union {
-  int integer;
+  struct number num;
   char *string;
 };
 
-%token <integer> INTEGER
+%token <num> INTEGER
+%token <num> RATIONAL
 %token <string> VARIABLE
 
-%type <integer> expr
+%type <num> expr
 
 %right '='
 %left '+' '-'
@@ -49,37 +43,38 @@
 %%
 
 program:
-        program expr '\n'      { printf("%d\n", $2); }
+        program expr '\n'      { PRINT_NUMBER($2); }
         |
         ;
 
 expr:
-        expr '+' expr             { $$ = $1 + $3; }
-        | expr '-' expr             { $$ = $1 - $3; }
-        | expr '*' expr             { $$ = $1 * $3; }
-        | expr '/' expr             { $$ = $1 / $3; }
-        | expr '^' expr             { $$ = pow($1, $3); }
-        | '-' expr %prec UMINUS     { $$ = -$2; }
+        expr '+' expr             { $$ = ADD($1, $3); }
+        | expr '-' expr             { $$ = SUBTRACT($1, $3); }
+        | expr '*' expr             { $$ = MULTIPLY($1, $3); }
+        | expr '/' expr             { $$ = DIVIDE($1, $3); }
+        | expr '^' expr             { $$ = POW($1, $3); }
+        | '-' expr %prec UMINUS     { $$ = NEGATE($2); }
         | VARIABLE '=' expr         { $$ = set_var($1, $3); }
         | '(' expr ')'              { $$ = $2; }
         | VARIABLE                  { $$ = get_var($1); }
         | INTEGER
+        | RATIONAL
         ;
 
 %%
 
-int get_var(char *name) {
+struct number get_var(char *name) {
   khiter_t k;
 
   k = kh_get(str, variables, name);
 
   // no var set. maybe we should throw an error?
-  if (k == kh_end(variables)) return 0;
+  if (k == kh_end(variables)) return NEW_INTEGER(0);
 
   return kh_value(variables, k);
 }
 
-int set_var(char *name, int value) {
+struct number set_var(char *name, struct number value) {
   khiter_t k;
   int ret;
 
