@@ -1,7 +1,7 @@
 calc
 ====
 
-A simple calculator made with lex and yacc. Trying to make it feature compatable with [jisoncalc](http://github.com/davidbalbert/jisoncalc).
+A simple calculator made with lex and yacc. Trying to make it feature compatable with [jisoncalc](http://github.com/davidbalbert/jisoncalc). Supports floating point math.
 
 ##Using
 
@@ -16,6 +16,8 @@ $ ./calc
 => 36
 >> baz = foo + bar
 => 42
+>> 3 + 4.3
+=> 7.3
 ```
 
 ##License
